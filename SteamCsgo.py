@@ -7,7 +7,7 @@ from fake_useragent import UserAgent
 from lxml import etree
 from urllib.parse import urlencode
 
-
+#wd
 class SteamCsgo:
     def __init__(self, start, save_file_path, page_num):
         # 确认起始爬取值 第几个商品
