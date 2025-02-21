@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSGO Data Collector</title>
+    <style>
+        body { 
+            font-family: Arial;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        #status {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>CSGO Market Data Collector</h1>
+    <form id="crawlerForm" method="POST">
+        <div class="form-group">
+            <label>Price Range:</label>
+            <input type="number" name="price_range" required>
+        </div>
+        <div class="form-group">
+            <label>Output File Name:</label>
+            <input type="text" name="output_file" value="CsgoSteam.csv" required>
+        </div>
+        <div class="form-group">
+            <label>Refresh Time (seconds):</label>
+            <input type="number" name="refresh_time" value="60" required>
+        </div>
+        <button type="submit">Start Collection</button>
+    </form>
+
+    <div id="status"></div>
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>饰品名称</th>
+                <th>饰品价格</th>
+                <th>当前在售数量</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        document.getElementById('crawlerForm').onsubmit = function(e) {
+            e.preventDefault();
+            fetch('/', {
+                method: 'POST',
+                body: new FormData(this)
+            }).then(response => {
+                startDataUpdates();
+            });
+        };
+
+        function updateTable(data) {
+            const tbody = document.querySelector('#dataTable tbody');
+            tbody.innerHTML = '';
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item['饰品名称']}</td>
+                    <td>${item['饰品价格']}</td>
+                    <td>${item['当前在售数量']}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function startDataUpdates() {
+            setInterval(() => {
+                fetch('/get_data')
+                    .then(response => response.json())
+                    .then(data => {
+                        updateTable(data.data);
+                        document.getElementById('status').textContent = 
+                            `Total items collected: ${data.total_rows} | Status: ${data.running ? 'Running' : 'Stopped'}`;
+                    });
+            }, 2000); // Update every 2 seconds
+        }
+    </script>
+</body>
+</html>

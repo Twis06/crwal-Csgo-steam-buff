@@ -7,7 +7,7 @@ from fake_useragent import UserAgent
 from lxml import etree
 from urllib.parse import urlencode
 
-#wd
+
 class SteamCsgo:
     def __init__(self, start, save_file_path, page_num):
         # 确认起始爬取值 第几个商品
@@ -89,3 +89,88 @@ class SteamCsgo:
 if __name__ == '__main__':
     S = SteamCsgo(6500, './CsgoSteam.csv', 60)
     S.get_page()
+
+    # For a web GUI, I recommend creating a separate Flask application
+    # Create a new file called app.py with the following code:
+    """
+    from flask import Flask, render_template, request
+    from SteamCsgo import SteamCsgo
+    
+    app = Flask(__name__)
+    
+    @app.route('/', methods=['GET', 'POST'])
+    def index():
+        if request.method == 'POST':
+            price_range = int(request.form['price_range'])
+            output_file = request.form['output_file']
+            refresh_time = int(request.form['refresh_time'])
+            
+            steam = SteamCsgo(price_range, output_file, refresh_time)
+            steam.get_page()
+            return 'Data collection complete! Check your CSV file.'
+            
+        return render_template('index.html')
+        
+    if __name__ == '__main__':
+        app.run(debug=True)
+    """
+    
+    # Then create a templates folder and add index.html:
+    """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>CSGO Data Collector</title>
+        <style>
+            body { 
+                font-family: Arial;
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            .form-group {
+                margin: 20px 0;
+            }
+            label {
+                display: block;
+                margin-bottom: 5px;
+            }
+            input {
+                width: 100%;
+                padding: 8px;
+            }
+            button {
+                background: #4CAF50;
+                color: white;
+                padding: 10px 20px;
+                border: none;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>CSGO Market Data Collector</h1>
+        <form method="POST">
+            <div class="form-group">
+                <label>Price Range:</label>
+                <input type="number" name="price_range" required>
+            </div>
+            <div class="form-group">
+                <label>Output File Name:</label>
+                <input type="text" name="output_file" value="CsgoSteam.csv" required>
+            </div>
+            <div class="form-group">
+                <label>Refresh Time (seconds):</label>
+                <input type="number" name="refresh_time" value="60" required>
+            </div>
+            <button type="submit">Start Collection</button>
+        </form>
+    </body>
+    </html>
+    """
+    
+    # To use this:
+    # 1. Install Flask: pip install flask
+    # 2. Create the files as shown above
+    # 3. Run: python app.py
+    # 4. Open browser to http://localhost:5000
